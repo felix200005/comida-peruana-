@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación Gastronomía Peruana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideInUp 0.8s ease;
+        }
+
+        .panel h2 {
+            color: #d62828;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .plato-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .plato-btn {
+            background: linear-gradient(135deg, #d62828 0%, #c1121f 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plato-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(214, 40, 40, 0.4);
+        }
+
+        .plato-btn.active {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        .plato-display {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .plato-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            animation: zoomIn 0.5s ease;
+        }
+
+        .ingredient-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ingredient-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInLeft 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+        }
+
+        .ingredient-amount {
+            color: #d62828;
+            font-weight: bold;
+        }
+
+        .simulator-controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .cooking-animation {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .cooking-pot {
+            font-size: 5rem;
+            animation: shake 0.5s infinite;
+            display: inline-block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .recipe-steps {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-left: 4px solid #d62828;
+            border-radius: 5px;
+            animation: fadeInRight 0.5s ease;
+        }
+
+        .step.completed {
+            opacity: 0.6;
+            border-left-color: #2ecc71;
+        }
+
+        .result-display {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            animation: bounceIn 0.6s ease;
+            display: none;
+        }
+
+        .result-display.show {
+            display: block;
+        }
+
+        .result-display h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .rating {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .plato-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇵🇪 Simulador de Cocina Peruana</h1>
+            <p>Aprende a preparar los mejores platos tradicionales</p>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Platos Preparados</div>
+                <div class="stat-number" id="platosPrparados">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Estrellas Ganadas</div>
+                <div class="stat-number" id="estrellas">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Nivel Chef</div>
+                <div class="stat-number" id="nivel">Aprendiz</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Tiempo Total</div>
+                <div class="stat-number" id="tiempo">0 min</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2>🍽️ Selecciona un Plato</h2>
+                <div class="plato-selector" id="platoSelector"></div>
+                
+                <div class="plato-display" id="platoDisplay">
+                    <p style="text-align: center; color: #666; padding: 50px 0;">
+                        Selecciona un plato para comenzar
+                    </p>
+                </div>
+
+                <div class="simulator-controls">
+                    <button class="control-btn start-btn" id="startBtn" disabled>
+                        ▶️ Comenzar Preparación
+                    </button>
+                    <button class="control-btn reset-btn" id="resetBtn">
+                        🔄 Reiniciar
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>👨‍🍳 Proceso de Cocción</h2>
+                <div id="cookingArea">
+                    <div style="text-align: center; padding: 80px 20px; color: #999;">
+                        <p style="font-size: 3rem;">🍳</p>
+                        <p style="margin-top: 20px;">Esperando para comenzar...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const platos = {
+            ceviche: {
+                nombre: "Ceviche",
+                tiempo: 15,
+                imagen: "https://images.unsplash.com/photo-1619323046583-b44e93a1d33f?w=400",
+                ingredientes: [
+                    { nombre: "Pescado fresco", cantidad: "500g" },
+                    { nombre: "Limones", cantidad: "10 unidades" },
+                    { nombre: "Cebolla morada", cantidad: "1 unidad" },
+                    { nombre: "Ají limo", cantidad: "2 unidades" },
+                    { nombre: "Cilantro", cantidad: "1 manojo" }
+                ],
+                pasos: [
+                    "Cortar el pescado en cubos pequeños",
+                    "Exprimir los limones frescos",
+                    "Cortar la cebolla en juliana fina",
+                    "Mezclar pescado con limón",
+                    "Agregar cebolla, ají y cilantro",
+                    "Servir inmediatamente bien frío"
+                ]
+            },
+            lomoSaltado: {
+                nombre: "Lomo Saltado",
+                tiempo: 25,
+                imagen: "https://images.unsplash.com/photo-1626776876729-bab4fe8379c2?w=400",
+                ingredientes: [
+                    { nombre: "Lomo de res", cantidad: "600g" },
+                    { nombre: "Papas", cantidad: "4 unidades" },
+                    { nombre: "Cebolla", cantidad: "2 unidades" },
+                    { nombre: "Tomate", cantidad: "3 unidades" },
+                    { nombre: "Sillao", cantidad: "3 cdas" }
+                ],
+                pasos: [
+                    "Cortar la carne en tiras",
+                    "Freír las papas hasta dorar",
+                    "Saltear la carne a fuego alto",
+                    "Agregar cebolla y tomate",
+                    "Añadir sillao y vinagre",
+                    "Mezclar con papas fritas"
+                ]
+            },
+            ajiGallina: {
+                nombre: "Ají de Gallina",
+                tiempo: 40,
+                imagen: "https://images.unsplash.com/photo-1604152135912-04a022e23696?w=400",
+                ingredientes: [
+                    { nombre: "Pechuga de pollo", cantidad: "800g" },
+                    { nombre: "Ají amarillo", cantidad: "6 unidades" },
+                    { nombre: "Pan de molde", cantidad: "6 rebanadas" },
+                    { nombre: "Leche evaporada", cantidad: "1 tarro" },
+                    { nombre: "Queso parmesano", cantidad: "100g" }
+                ],
+                pasos: [
+                    "Cocinar y desmenuzar el pollo",
+                    "Licuar ají amarillo con pan",
+                    "Preparar salsa con leche y queso",
+                    "Mezclar pollo con la salsa",
+                    "Cocinar a fuego lento",
+                    "Servir sobre papas y arroz"
+                ]
+            },
+            anticuchos: {
+                nombre: "Anticuchos",
+                tiempo: 30,
+                imagen: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400",
+                ingredientes: [
+                    { nombre: "Corazón de res", cantidad: "1kg" },
+                    { nombre: "Ají panca", cantidad: "5 unidades" },
+                    { nombre: "Vinagre", cantidad: "1/2 taza" },
+                    { nombre: "Comino", cantidad: "2 cdtas" },
+                    { nombre: "Ajos", cantidad: "5 dientes" }
+                ],
+                pasos: [
+                    "Limpiar y cortar corazones",
+                    "Preparar marinada con ají panca",
+                    "Marinar por 2 horas mínimo",
+                    "Ensartar en palitos",
+                    "Asar a la parrilla",
+                    "Servir con papa y choclo"
+                ]
+            }
+        };
+
+        let stats = {
+            platosPrparados: 0,
+            estrellas: 0,
+            tiempoTotal: 0
+        };
+
+        let selectedPlato = null;
+        let isCooking = false;
+
+        function initializePlatos() {
+            const selector = document.getElementById('platoSelector');
+            Object.keys(platos).forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'plato-btn';
+                btn.textContent = platos[key].nombre;
+                btn.onclick = () => selectPlato(key);
+                selector.appendChild(btn);
+            });
+        }
+
+        function selectPlato(key) {
+            if (isCooking) return;
+            
+            selectedPlato = key;
+            const plato = platos[key];
+            
+            document.querySelectorAll('.plato-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const display = document.getElementById('platoDisplay');
+            display.innerHTML = `
+                <img src="${plato.imagen}" alt="${plato.nombre}" class="plato-image">
+                <h3 style="color: #d62828; margin-bottom: 15px;">${plato.nombre}</h3>
+                <p style="color: #666; margin-bottom: 20px;">⏱️ Tiempo de preparación: ${plato.tiempo} minutos</p>
+                <h4 style="margin-bottom: 10px;">Ingredientes:</h4>
+                <ul class="ingredient-list">
+                    ${plato.ingredientes.map(ing => `
+                        <li class="ingredient-item">
+                            <span class="ingredient-name">${ing.nombre}</span>
+                            <span class="ingredient-amount">${ing.cantidad}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function startCooking() {
+            if (!selectedPlato || isCooking) return;
+            
+            isCooking = true;
+            document.getElementById('startBtn').disabled = true;
+            
+            const plato = platos[selectedPlato];
+            const cookingArea = document.getElementById('cookingArea');
+            
+            cookingArea.innerHTML = `
+                <div class="cooking-animation">
+                    <div class="cooking-pot">🍲</div>
+                    <p style="margin-top: 20px; font-size: 1.2rem; color: #d62828;">¡Cocinando ${plato.nombre}!</p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+                <div class="recipe-steps" id="recipeSteps"></div>
+            `;
+            
+            simulateCooking(plato);
+        }
+
+        function simulateCooking(plato) {
+            const stepsContainer = document.getElementById('recipeSteps');
+            const progressFill = document.getElementById('progressFill');
+            const stepDuration = (plato.tiempo * 1000) / plato.pasos.length;
+            
+            let currentStep = 0;
+            
+            function executeStep() {
+                if (currentStep < plato.pasos.length) {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'step';
+                    stepDiv.innerHTML = `<strong>Paso ${currentStep + 1}:</strong> ${plato.pasos[currentStep]}`;
+                    stepsContainer.appendChild(stepDiv);
+                    
+                    setTimeout(() => {
+                        stepDiv.classList.add('completed');
+                    }, stepDuration - 200);
+                    
+                    const progress = ((currentStep + 1) / plato.pasos.length) * 100;
+                    progressFill.style.width = progress + '%';
+                    progressFill.textContent = Math.round(progress) + '%';
+                    
+                    currentStep++;
+                    setTimeout(executeStep, stepDuration);
+                } else {
+                    finishCooking(plato);
+                }
+            }
+            
+            executeStep();
+        }
+
+        function finishCooking(plato) {
+            const rating = Math.floor(Math.random() * 2) + 4;
+            const cookingArea = document.getElementById('cookingArea');
+            
+            stats.platosPrparados++;
+            stats.estrellas += rating;
+            stats.tiempoTotal += plato.tiempo;
+            
+            updateStats();
+            
+            cookingArea.innerHTML = `
+                <div class="result-display show">
+                    <h3>¡${plato.nombre} completado!</h3>
+                    <div class="rating">${'⭐'.repeat(rating)}</div>
+                    <p style="font-size: 1.2rem; margin: 15px 0;">Calificación: ${rating}/5 estrellas</p>
+                    <p style="color: #666;">¡Excelente trabajo! Tu plato está listo para servir.</p>
+                </div>
+            `;
+            
+            isCooking = false;
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function updateStats() {
+            document.getElementById('platosPrparados').textContent = stats.platosPrparados;
+            document.getElementById('estrellas').textContent = stats.estrellas;
+            document.getElementById('tiempo').textContent = stats.tiempoTotal + ' min';
+            
+            let nivel = 'Aprendiz';
+            if (stats.platosPrparados >= 10) nivel = 'Maestro';
+            else if (stats.platosPrparados >= 5) nivel = 'Chef';
+            else if (stats.platosPrparados >= 2) nivel = 'Cocinero';
+            
+            document.getElementById('nivel').textContent = nivel;
+        }
+
+        function reset() {
+            if (isCooking) return;
+            
+            selectedPlato = null;
+            document.getElementById('platoDisplay').innerHTML = `
+                <p style="text-align: center; color: #666; padding: 50px 0;">
+                    Selecciona un plato para comenzar
+                </p>
+            `;
+            
+            document.getElementById('cookingArea').innerHTML = `
+                <div style="text-align: center; padding: 80px 20px; color: #999;">
+                    <p style="font-size: 3rem;">🍳</p>
+                    <p style="margin-top: 20px;">Esperando para comenzar...</p>
+                </div>
+            `;
+            
+            document.querySelectorAll('.plato-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById('startBtn').disabled = true;
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startCooking);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        initializePlatos();
+    </script>
+</body>
+</html>
